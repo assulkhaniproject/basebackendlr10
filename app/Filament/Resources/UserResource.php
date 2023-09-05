@@ -28,8 +28,13 @@ use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Hash;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
+use pxlrbt\FilamentExcel\Exports\ExcelExport;
+use pxlrbt\FilamentExcel\Columns\Column;
 use STS\FilamentImpersonate\Tables\Actions\Impersonate;
 
 class UserResource extends Resource
@@ -79,21 +84,42 @@ class UserResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->contentGrid([
+                'md' => 2,
+                'xl' => 2,
+            ])
             ->columns([
                 Split::make([
                     ImageColumn::make('photo')
-                        ->circular()
-                        ->grow(false),
-                    TextColumn::make('name')
-                        ->weight(FontWeight::Bold)
-                        ->searchable()
-                        ->sortable(),
+                        ->getStateUsing(function (Model $record) {
+                            if ($record->photo) {
+                                $thumb = $record->photo;
+                                return $thumb;
+                            }
+                            return asset('https://png.pngtree.com/png-vector/20190820/ourmid/pngtree-no-avatar-vector-isolated-on-white-background-png-image_1694546.jpg');
+                        })
+                        ->grow(false)
+                        ->height('80px')
+                        ->width('80px')
+                        ->extraImgAttributes([
+                            'class' => 'object-cover h-cover rounded-xl w-full',
+                        ]),
                     Stack::make([
-                        TextColumn::make('telp')
-                            ->icon('heroicon-m-phone'),
-                        TextColumn::make('email')
-                            ->icon('heroicon-m-envelope'),
-                    ])->visibleFrom('md'),
+                        Split::make([
+                            TextColumn::make('name')
+                                ->weight(FontWeight::Bold)
+                                ->searchable()
+                                ->sortable()
+                                ->icon('heroicon-m-user'),
+                            TextColumn::make('roles.name')->alignRight()->color('primary')->badge(),
+                        ]),
+                        Stack::make([
+                            TextColumn::make('telp')
+                                ->icon('heroicon-m-phone'),
+                            TextColumn::make('email')
+                                ->icon('heroicon-m-envelope'),
+                        ])->visibleFrom('md'),
+                    ])->space('3'),
                 ])
             ])
             ->filters([
@@ -111,13 +137,25 @@ class UserResource extends Resource
                     ->icon('heroicon-m-ellipsis-vertical')
                     ->size(ActionSize::Small)
                     ->color('primary')
-                    // ->button()
+                // ->button()
 
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
+                    ExportBulkAction::make(),
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
+            ])
+            ->headerActions([
+                ExportAction::make()->exports([
+                    ExcelExport::make()->withColumns([
+                        Column::make('name'),
+                        Column::make('email'),
+                        Column::make('telp'),
+                        Column::make('address'),
+                        Column::make('created_at'),
+                    ]),
+                ])
             ])
             ->emptyStateActions([
                 Tables\Actions\CreateAction::make(),

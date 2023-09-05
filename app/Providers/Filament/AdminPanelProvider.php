@@ -22,6 +22,8 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use lockscreen\FilamentLockscreen\Lockscreen;
 use lockscreen\FilamentLockscreen\Http\Middleware\Locker;
+use ShuvroRoy\FilamentSpatieLaravelHealth\FilamentSpatieLaravelHealthPlugin;
+use ShuvroRoy\FilamentSpatieLaravelHealth\Pages\HealthCheckResults;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -34,6 +36,7 @@ class AdminPanelProvider extends PanelProvider
             ->login()
             ->plugins([
                 new Lockscreen(),
+                FilamentSpatieLaravelHealthPlugin::make()->usingPage(HealthCheckResults::class),
                 \BezhanSalleh\FilamentShield\FilamentShieldPlugin::make(),
                 LightSwitchPlugin::make()->position(Alignment::TopCenter),
                 StickyHeaderPlugin::make()->floating()->colored(),
