@@ -40,12 +40,10 @@ use STS\FilamentImpersonate\Tables\Actions\Impersonate;
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
-
-
+    
     protected static ?string $navigationGroup = 'User Management';
 
     protected static ?int $navigationSort = 1;
-
 
     protected static ?string $navigationIcon = 'heroicon-o-users';
 

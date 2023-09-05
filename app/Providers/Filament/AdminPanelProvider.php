@@ -8,6 +8,7 @@ use Awcodes\LightSwitch\LightSwitchPlugin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\NavigationGroup;
 use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -36,7 +37,6 @@ class AdminPanelProvider extends PanelProvider
             ->login()
             ->plugins([
                 new Lockscreen(),
-                FilamentSpatieLaravelHealthPlugin::make()->usingPage(HealthCheckResults::class),
                 \BezhanSalleh\FilamentShield\FilamentShieldPlugin::make(),
                 LightSwitchPlugin::make()->position(Alignment::TopCenter),
                 StickyHeaderPlugin::make()->floating()->colored(),
@@ -64,6 +64,10 @@ class AdminPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
+            ])
+            ->navigationGroups([
+                NavigationGroup::make()
+                     ->label('User Management')->collapsed(),
             ])
             ->authMiddleware([
                 Authenticate::class,
